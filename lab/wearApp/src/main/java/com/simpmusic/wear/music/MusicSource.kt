@@ -29,6 +29,8 @@ class MusicSource(private val youtube: YouTube = YouTube()) {
     suspend fun search(query: String): Result<List<WearSong>> = withContext(Dispatchers.IO) {
         youtube.search(query, YouTube.SearchFilter.FILTER_SONG).map { result ->
             result.items.filterIsInstance<SongItem>().map { it.toWearSong() }
+        }.onSuccess { lista ->
+            Log.i(TAG, "resultados: " + lista.joinToString(" | ") { "${it.videoId}=${it.title}" })
         }.onFailure { Log.e(TAG, "busqueda fallida: $query", it) }
     }
 

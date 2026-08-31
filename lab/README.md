@@ -6,6 +6,11 @@ Contenedor Docker con el toolchain completo (JDK 21, Android SDK 37, Gradle 9.5.
 
 | Verificación | Resultado |
 |---|---|
+| **Busca en YouTube Music** (sin login) | ✅ "daft punk" devuelve resultados reales |
+| **Reproduce streaming real** | ✅ Opus itag 251, `state=PLAYING`, posición avanzando |
+| **Importa las playlists del móvil** | ✅ 2 playlists leídas del backup, sin tocar la app del móvil |
+| **Descarga para offline** | ✅ 5/5 canciones, 26 MB en el reloj |
+| **Reproduce EN MODO AVIÓN** | ✅ `state=PLAYING`, posición 6,4s → 9,3s sin red |
 | El core de SimpMusic compila (`:media3`) | ✅ `BUILD SUCCESSFUL in 4m 27s` |
 | El módulo `:wearApp` produce APK | ✅ `wearApp-debug.apk`, 81 MB |
 | Es una app de reloj de verdad | ✅ `uses-feature: android.hardware.type.watch` |
@@ -78,6 +83,11 @@ Están resueltas en los scripts, pero conviene conocerlas.
 
 ## Estado real del código
 
-Lo que hay en `wearApp/` es **F1 del plan, funcionando**: servicio de reproducción, el puente a Horologist y la pantalla de reproducción, con audio real.
+**F0 a F3 funcionando y verificado ejecutando.** El reloj busca en YouTube Music, reproduce en streaming, importa las playlists del móvil, descarga canciones y las reproduce sin cobertura.
 
-Lo que **no** es todavía: `WearPlaybackService` usa un `ExoPlayer` propio con una pista local, no el pipeline de SimpMusic con `kotlinYtmusicScraper`. Ese cambio es F2 y es deliberadamente el siguiente paso — pero la parte arriesgada (que la UI de Horologist se pueda alimentar desde un `MediaController`, que es el ADR 0003) **ya está demostrada ejecutando**, que era lo que ninguna app open source conocida hacía.
+Quedan **F4** (activar R8 con las reglas del PR #1864 y perfilar memoria y batería en reloj real) y **F5** (tile y complicación).
+
+Limitaciones conocidas, a propósito:
+- La importación del backup es **manual**: exportas en el móvil, llevas el fichero, importas. Sin sincronización automática, para no tocar la app del móvil ([ADR 0005](../docs/adr/0005-importar-backup-en-vez-de-sincronizar.md)).
+- No hay biblioteca **remota** de YouTube Music (tus "me gusta", tus playlists de YT): eso sí exige la cookie de Google. Las playlists locales no.
+- Las descargas van en el proceso de la app, no en un servicio en primer plano: si cierras la app a media descarga, se corta. Los ficheros a medias se descartan (`.parcial` que no se renombra), así que no quedan reproducciones rotas.
