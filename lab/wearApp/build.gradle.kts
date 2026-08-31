@@ -67,6 +67,10 @@ dependencies {
     implementation(libs.media3.session)
     implementation(libs.media3.exoplayer)
 
+    // --- core de SimpMusic: scraper de YouTube Music ---
+    implementation(projects.kotlinYtmusicScraper)
+    implementation(projects.common)
+
     implementation(libs.activity.compose)
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")

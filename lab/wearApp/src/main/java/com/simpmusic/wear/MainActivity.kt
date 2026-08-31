@@ -18,8 +18,15 @@ class MainActivity : ComponentActivity() {
         // Una instancia por conexión: PlayerRepositoryImpl no admite reconectar.
         playbackConnection = PlaybackConnection(this).apply { connect() }
 
+        // Permite lanzar una busqueda sin dictar, util para probar:
+        //   adb shell am start -n com.simpmusic.wear/.MainActivity --es query "daft punk"
+        val consultaInicial = intent?.getStringExtra("query")
+
         setContent {
-            WearApp(playerRepository = playbackConnection.playerRepository)
+            WearApp(
+                playerRepository = playbackConnection.playerRepository,
+                consultaInicial = consultaInicial,
+            )
         }
     }
 

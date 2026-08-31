@@ -32,7 +32,7 @@ docker run -d --name wearemu \
   -p 5555:5555 \
   -w /work \
   wearlab:gui \
-  bash -lc "emulator -avd $AVD -gpu swiftshader_indirect -no-snapshot -accel on -no-boot-anim"
+  bash -lc "emulator -avd $AVD -gpu swiftshader_indirect -no-snapshot -accel on -no-boot-anim -dns-server 8.8.8.8,1.1.1.1"
 
 echo "Emulador '$AVD' arrancando. La ventana del reloj aparecera en unos 30-60 s."
 echo
