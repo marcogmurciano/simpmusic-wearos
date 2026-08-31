@@ -15,13 +15,20 @@ android {
         versionName = "0.1.0-f1"
     }
 
+    signingConfigs {
+        // Para uso personal se firma release con la clave de debug: asi se puede
+        // instalar encima del debug sin desinstalar.
+        getByName("debug") { }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false          // el bug de R8 del PR #1864 no aplica aquí
         }
         release {
-            isMinifyEnabled = false          // se activa en F4 con las reglas del PR #1864
+            isMinifyEnabled = true           // F4: R8 activado
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
