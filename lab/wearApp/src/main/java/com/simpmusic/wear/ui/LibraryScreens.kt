@@ -19,6 +19,7 @@ import androidx.wear.compose.material3.Text
 import com.simpmusic.wear.library.LibraryUiState
 import com.simpmusic.wear.library.LibraryViewModel
 import com.simpmusic.wear.library.WearPlaylist
+import com.simpmusic.wear.music.CuentaPlaylist
 import com.simpmusic.wear.music.WearSong
 
 /** Menu raiz del reloj. */
@@ -37,7 +38,11 @@ fun HomeScreen(onBuscar: () -> Unit, onBiblioteca: () -> Unit, onDescargas: () -
 
 /** Playlists importadas del backup del movil. */
 @Composable
-fun LibraryScreen(viewModel: LibraryViewModel, onPlaylist: (WearPlaylist) -> Unit) {
+fun LibraryScreen(
+    viewModel: LibraryViewModel,
+    onPlaylist: (WearPlaylist) -> Unit,
+    onPlaylistCuenta: (CuentaPlaylist) -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ScalingLazyColumn(
@@ -78,9 +83,23 @@ fun LibraryScreen(viewModel: LibraryViewModel, onPlaylist: (WearPlaylist) -> Uni
                     ) { Text("Reintentar") }
                 }
             }
-            is LibraryUiState.Listo -> items(s.playlists) { pl ->
-                Button(onClick = { onPlaylist(pl) }, modifier = Modifier.fillMaxWidth()) {
-                    Text("${pl.title} (${pl.songs.size})", maxLines = 2)
+            is LibraryUiState.Listo -> {
+                // Primero las de la cuenta: vienen del servidor y estan siempre al dia.
+                if (s.deLaCuenta.isNotEmpty()) {
+                    item { ListHeader { Text("De tu cuenta") } }
+                    items(s.deLaCuenta) { pl ->
+                        Button(onClick = { onPlaylistCuenta(pl) }, modifier = Modifier.fillMaxWidth()) {
+                            Text(pl.title, maxLines = 2)
+                        }
+                    }
+                }
+                if (s.locales.isNotEmpty()) {
+                    item { ListHeader { Text("Del backup") } }
+                    items(s.locales) { pl ->
+                        Button(onClick = { onPlaylist(pl) }, modifier = Modifier.fillMaxWidth()) {
+                            Text("${pl.title} (${pl.songs.size})", maxLines = 2)
+                        }
+                    }
                 }
             }
         }

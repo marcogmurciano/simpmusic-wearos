@@ -3,6 +3,8 @@ package com.simpmusic.wear.library
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.simpmusic.wear.music.CuentaPlaylist
+import com.simpmusic.wear.music.MusicSource
 import com.simpmusic.wear.music.WearSong
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,13 +15,23 @@ import java.io.File
 sealed interface LibraryUiState {
     data object SinBackup : LibraryUiState
     data object Cargando : LibraryUiState
-    data class Listo(val playlists: List<WearPlaylist>) : LibraryUiState
+    /**
+     * [deLaCuenta] son las playlists que vienen del servidor de YouTube Music (siempre al
+     * dia); [locales] las del backup del movil (una foto del momento).
+     */
+    data class Listo(
+        val locales: List<WearPlaylist>,
+        val deLaCuenta: List<CuentaPlaylist> = emptyList(),
+    ) : LibraryUiState
     data class Error(val mensaje: String) : LibraryUiState
 }
 
 class LibraryViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val downloads = Downloads(app)
+    private val source = MusicSource()
+    private val downloads = Downloads(app, source)
+
+    val haySesion: Boolean get() = source.haySesion
 
     private val _state = MutableStateFlow<LibraryUiState>(LibraryUiState.SinBackup)
     val state: StateFlow<LibraryUiState> = _state.asStateFlow()
@@ -64,10 +76,21 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
                 _state.value = LibraryUiState.Error("El ZIP no lleva la base de datos")
                 return@launch
             }
-            _state.value = BackupImporter.leerPlaylists(bd).fold(
-                onSuccess = { if (it.isEmpty()) LibraryUiState.Error("Sin playlists") else LibraryUiState.Listo(it) },
-                onFailure = { LibraryUiState.Error(it.message ?: "Backup ilegible") },
-            )
+            // La cookie viene en el mismo ZIP: con ella el reloj deja de depender de
+            // ficheros y pide la biblioteca al servidor, como Spotify o YT Music.
+            SessionImporter.extraerCookie(zip)?.let(source::iniciarSesion)
+
+            val locales = BackupImporter.leerPlaylists(bd).getOrElse { emptyList() }
+            val deLaCuenta =
+                if (source.haySesion) source.playlistsDeLaCuenta().getOrElse { emptyList() }
+                else emptyList()
+
+            _state.value =
+                if (locales.isEmpty() && deLaCuenta.isEmpty()) {
+                    LibraryUiState.Error("Sin playlists")
+                } else {
+                    LibraryUiState.Listo(locales = locales, deLaCuenta = deLaCuenta)
+                }
         }
     }
 
@@ -82,6 +105,17 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun descargarTodas(playlist: WearPlaylist) = playlist.songs.forEach(::descargar)
+
+    /** Canciones de una playlist de la cuenta, pedidas al servidor. */
+    private val _cancionesCuenta = MutableStateFlow<List<WearSong>>(emptyList())
+    val cancionesCuenta: StateFlow<List<WearSong>> = _cancionesCuenta.asStateFlow()
+
+    fun abrirPlaylistDeCuenta(playlist: CuentaPlaylist) {
+        _cancionesCuenta.value = emptyList()
+        viewModelScope.launch {
+            _cancionesCuenta.value = source.cancionesDe(playlist.browseId).getOrElse { emptyList() }
+        }
+    }
 
     /** Ruta local reproducible sin red, o null si no esta descargada. */
     fun uriOffline(videoId: String): String? =

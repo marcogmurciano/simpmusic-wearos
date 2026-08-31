@@ -27,6 +27,7 @@ private object Rutas {
     const val BUSCAR = "buscar"
     const val BIBLIOTECA = "biblioteca"
     const val PLAYLIST = "playlist"
+    const val PLAYLIST_CUENTA = "playlist_cuenta"
     const val DESCARGAS = "descargas"
     const val REPRODUCTOR = "reproductor"
 }
@@ -49,6 +50,7 @@ fun WearApp(playerRepository: PlayerRepository, consultaInicial: String? = null)
     // La playlist abierta se guarda aqui: pasar objetos por argumentos de ruta
     // obligaria a serializarla entera en la URL.
     var playlistAbierta by remember { mutableStateOf<WearPlaylist?>(null) }
+    var tituloCuenta by remember { mutableStateOf("") }
 
     LaunchedEffect(consultaInicial) {
         if (!consultaInicial.isNullOrBlank()) {
@@ -97,12 +99,25 @@ fun WearApp(playerRepository: PlayerRepository, consultaInicial: String? = null)
             LibraryScreen(
                 viewModel = libraryViewModel,
                 onPlaylist = { playlistAbierta = it; nav.navigate(Rutas.PLAYLIST) },
+                onPlaylistCuenta = {
+                    tituloCuenta = it.title
+                    libraryViewModel.abrirPlaylistDeCuenta(it)
+                    nav.navigate(Rutas.PLAYLIST_CUENTA)
+                },
             )
         }
         composable(Rutas.PLAYLIST) {
             playlistAbierta?.let { pl ->
                 PlaylistScreen(playlist = pl, viewModel = libraryViewModel, onReproducir = ::reproducir)
             }
+        }
+        composable(Rutas.PLAYLIST_CUENTA) {
+            val canciones by libraryViewModel.cancionesCuenta.collectAsStateWithLifecycle()
+            PlaylistScreen(
+                playlist = WearPlaylist(id = -1, title = tituloCuenta, songs = canciones),
+                viewModel = libraryViewModel,
+                onReproducir = ::reproducir,
+            )
         }
         composable(Rutas.DESCARGAS) {
             DownloadsScreen(viewModel = libraryViewModel, onReproducir = ::reproducir)
