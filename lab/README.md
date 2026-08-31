@@ -18,7 +18,18 @@ Contenedor Docker con el toolchain completo (JDK 21, Android SDK 37, Gradle 9.5.
 
 ![Pista cargada](../docs/img/player-cargado.png) ![Reproduciendo](../docs/img/player-reproduciendo.png)
 
-## Uso
+## Probarlo tú mismo, con ventana
+
+El emulador se abre como una ventana normal del escritorio (X11 o Wayland con XWayland), sin instalar nada en el anfitrión:
+
+```bash
+./reloj.sh          # abre el reloj en una ventana
+./instalar.sh       # compila, instala y abre la app dentro
+```
+
+Ratón para tocar, arrastrar para deslizar, **rueda del ratón para la corona giratoria**. Guía completa en [USO-INTERACTIVO.md](USO-INTERACTIVO.md).
+
+## Uso por línea de comandos
 
 ```bash
 # 1. Construir la imagen (~3.6 GB: SDK 37 + system images de Wear)
