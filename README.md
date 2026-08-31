@@ -2,7 +2,9 @@
 
 Plan técnico para llevar [SimpMusic](https://github.com/maxrave-dev/SimpMusic) (cliente FOSS de YouTube Music) a un reloj con Wear OS como **app standalone**: música sin llevar el móvil encima.
 
-> **Estado: planificación.** No hay código de la aplicación en este repositorio. Los fragmentos de Kotlin de la documentación son borradores sin compilar, escritos en una máquina sin JDK ni Android SDK; fijan la forma de la solución, no son código listo para usar. Todo lo demás —firmas de API, versiones, rutas de fichero— está verificado contra las fuentes y fechado.
+> **Estado: F1 funcionando y verificado ejecutando.** En [`lab/`](lab/) hay un contenedor Docker que compila el core de SimpMusic, produce un APK de reloj, lo instala en un emulador de Wear OS y **reproduce audio real**. La decisión de arquitectura arriesgada (el puente `MediaController` → Horologist, [ADR 0003](docs/adr/0003-adapter-mediacontroller.md)) está demostrada, no supuesta.
+>
+> Las fases F2-F5 siguen siendo plan. Los fragmentos de Kotlin de `docs/ARCHITECTURE.md` describen la forma de la solución; el código que de verdad compila y corre está en `lab/wearApp/`.
 
 ## Documentos
 
@@ -12,6 +14,13 @@ Plan técnico para llevar [SimpMusic](https://github.com/maxrave-dev/SimpMusic) 
 | [`docs/TESTING.md`](docs/TESTING.md) | Los dos entornos de depuración (emulador y reloj físico), pirámide de pruebas, checklist manual, recetas de `adb` |
 | [`docs/REFERENCES.md`](docs/REFERENCES.md) | Todo lo verificado, con enlaces y fecha. Incluye lo que **no** se pudo confirmar |
 | [`docs/adr/`](docs/adr/) | Cuatro decisiones de arquitectura, con alternativas descartadas y por qué |
+| [**`lab/`**](lab/) | **El contenedor: toolchain, módulo `wearApp` compilable, y qué se validó ejecutando** |
+
+## Demostrado, no supuesto
+
+![Pista cargada](docs/img/player-cargado.png) ![Reproduciendo](docs/img/player-reproduciendo.png)
+
+`PlayerScreen` de Horologist en una esfera de 384x384, alimentada por el puente, reproduciendo audio real (`state=PLAYING`, posición avanzando hasta los 8 s de la pista). Detalle y reproducibilidad en [`lab/README.md`](lab/README.md).
 
 ## La idea en una frase
 
