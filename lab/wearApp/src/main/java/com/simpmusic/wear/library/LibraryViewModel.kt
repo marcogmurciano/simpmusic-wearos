@@ -14,6 +14,8 @@ import java.io.File
 
 sealed interface LibraryUiState {
     data object SinBackup : LibraryUiState
+    /** Servidor levantado, esperando que el movil suba el fichero a [direccion]. */
+    data class Esperando(val direccion: String) : LibraryUiState
     data object Cargando : LibraryUiState
     /**
      * [deLaCuenta] son las playlists que vienen del servidor de YouTube Music (siempre al
@@ -61,6 +63,29 @@ class LibraryViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /** Importa el backup del movil desde la primera ruta candidata que exista. */
+    /**
+     * Levanta un servidor web en el reloj para recibir el backup desde el navegador del
+     * movil. Es la unica via razonable de meter un fichero en un reloj sin adb ni
+     * permisos: la app lo recibe directamente en su propio almacenamiento.
+     */
+    fun recibirDesdeElMovil() {
+        val app = getApplication<Application>()
+        val destino = File(app.filesDir, "simpmusic-backup.zip")
+        val servidor = ImportServer(destino)
+        val direccion = servidor.direccion()
+        if (direccion == null) {
+            _state.value = LibraryUiState.Error("El reloj no esta en ninguna red wifi")
+            return
+        }
+        _state.value = LibraryUiState.Esperando(direccion)
+        viewModelScope.launch {
+            servidor.esperarSubida().fold(
+                onSuccess = { importar(it.absolutePath) },
+                onFailure = { _state.value = LibraryUiState.Error(it.message ?: "Fallo al recibir") },
+            )
+        }
+    }
+
     fun importar(rutaZip: String? = null) {
         _state.value = LibraryUiState.Cargando
         viewModelScope.launch {

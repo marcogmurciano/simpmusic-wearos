@@ -83,10 +83,33 @@ fun LibraryScreen(
                 }
                 item {
                     Button(
+                        onClick = { viewModel.recibirDesdeElMovil() },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text("Recibir del movil") }
+                }
+                item {
+                    Button(
                         onClick = { viewModel.importar() },
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text("Importar backup") }
+                    ) { Text("Ya lo tengo aqui") }
                 }
+            }
+            is LibraryUiState.Esperando -> {
+                item {
+                    Text(
+                        "Abre esta direccion en el navegador del movil:",
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                item {
+                    Text(
+                        s.direccion,
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                item { CircularProgressIndicator() }
             }
             is LibraryUiState.Cargando -> item { CircularProgressIndicator() }
             is LibraryUiState.Error -> {
