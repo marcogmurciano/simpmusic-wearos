@@ -30,7 +30,24 @@ O desde el propio reloj: botón lateral (o tecla Inicio) → lista de aplicacion
 
 La reproducción no se corta al salir: el servicio de medios sigue en segundo plano, así que al volver encuentras la pista donde estaba.
 
-## Cómo se maneja
+## La barra lateral NO tiene botón de Inicio
+
+Conviene saberlo antes de buscarlo: en los AVD de Wear OS la barra de herramientas solo trae **Cerrar, Minimizar, Encendido, Volumen +, Volumen − y Captura**. No hay botón de Inicio ni de Atrás, porque un reloj real no los tiene: usa gestos y el botón físico lateral. El de encendido solo apaga y enciende la pantalla, y el de volumen abre un deslizador, así que parece que no hacen nada.
+
+Para navegar, usa el mando por terminal:
+
+```bash
+./reloj-ctl.sh apps       # lista de aplicaciones
+./reloj-ctl.sh musica     # abre SimpMusic Wear
+./reloj-ctl.sh esfera     # vuelve a la esfera del reloj
+./reloj-ctl.sh atras      # un paso atrás
+./reloj-ctl.sh foto       # guarda captura.png
+./reloj-ctl.sh donde      # dice qué hay en pantalla ahora
+```
+
+`esfera` insiste hasta llegar de verdad a la esfera, porque el número de pasos atrás depende de dónde estés.
+
+## Cómo se maneja con el ratón
 
 | Gesto real en el reloj | En la ventana |
 |---|---|
