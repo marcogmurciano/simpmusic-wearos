@@ -18,6 +18,18 @@ La ventana del reloj aparece en 30-60 segundos. Después:
 
 Para apagarlo: `docker rm -f wearemu`
 
+## Si te sales de la app
+
+Al pulsar el botón lateral vuelves a la esfera del reloj, como en uno de verdad. Para volver a la app:
+
+```bash
+./abrir.sh          # la reabre al instante
+```
+
+O desde el propio reloj: botón lateral (o tecla Inicio) → lista de aplicaciones → bajar con la **rueda del ratón** → **SimpMusic Wear**.
+
+La reproducción no se corta al salir: el servicio de medios sigue en segundo plano, así que al volver encuentras la pista donde estaba.
+
 ## Cómo se maneja
 
 | Gesto real en el reloj | En la ventana |
