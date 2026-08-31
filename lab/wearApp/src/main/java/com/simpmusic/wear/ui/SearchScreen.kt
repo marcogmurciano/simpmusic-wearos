@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,6 +39,7 @@ fun SearchScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberScalingLazyListState()
+    var sinDictado by remember { mutableStateOf(false) }
 
     val voiceLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
@@ -53,9 +57,25 @@ fun SearchScreen(
     ) {
         item { ListHeader { Text("Buscar musica") } }
 
+        if (sinDictado) {
+            item {
+                Text(
+                    "Este dispositivo no tiene dictado por voz",
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+
         item {
             Button(
-                onClick = { voiceLauncher.launch(voiceSearchIntent()) },
+                onClick = {
+                    // launch() lanza ActivityNotFoundException si el dispositivo no trae
+                    // reconocimiento de voz (pasa en emuladores y en relojes sin Google).
+                    // Sin este runCatching, tocar el boton mata la app.
+                    runCatching { voiceLauncher.launch(voiceSearchIntent()) }
+                        .onFailure { sinDictado = true }
+                },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Dictar busqueda") }
         }

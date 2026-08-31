@@ -18,6 +18,30 @@ La ventana del reloj aparece en 30-60 segundos. Después:
 
 Para apagarlo: `docker rm -f wearemu`
 
+## No se oye nada
+
+**El emulador de Wear OS arranca con el volumen de música en 2 de 15**, que en escala logarítmica son unos **−47 dB**: inaudible para música. Un tono de prueba sí se oye a ese nivel, porque un seno puro a amplitud máxima se percibe mucho mejor que una canción mezclada — por eso engaña.
+
+```bash
+./reloj-ctl.sh volumen      # sube el volumen de musica al maximo
+```
+
+O en la pantalla del reproductor, **gira la rueda del ratón**: es la corona del reloj y controla el volumen.
+
+Para comprobarlo objetivamente, la ganancia de la pista activa:
+
+```bash
+docker exec wearemu bash -lc "adb shell 'dumpsys media.audio_flinger'" | grep -A3 Underruns
+```
+
+La columna `G db` debe estar cerca de `0`. Si marca `-47`, es volumen, no un fallo de reproducción.
+
+## Si la app se cierra sola
+
+```bash
+./crash.sh      # vuelca el ultimo crash y los errores recientes de la app
+```
+
 ## Si te sales de la app
 
 Al pulsar el botón lateral vuelves a la esfera del reloj, como en uno de verdad. Para volver a la app:

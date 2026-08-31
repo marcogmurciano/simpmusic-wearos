@@ -6,6 +6,7 @@
 #   ./reloj-ctl.sh musica     abre SimpMusic Wear
 #   ./reloj-ctl.sh esfera     vuelve a la esfera del reloj
 #   ./reloj-ctl.sh atras      gesto de volver atras
+#   ./reloj-ctl.sh volumen    sube el volumen de musica al maximo
 #   ./reloj-ctl.sh foto       guarda captura.png
 #   ./reloj-ctl.sh donde      dice que hay en pantalla ahora
 set -euo pipefail
@@ -27,6 +28,10 @@ case "${1:-donde}" in
           done
           echo "De vuelta en la esfera." ;;
   atras)  a "shell input keyevent KEYCODE_BACK" >/dev/null; echo "Atras." ;;
+  volumen) # El emulador Wear arranca con el volumen de musica en 2/15 (-47 dB): inaudible
+           # para musica, aunque un tono de prueba si se oiga.
+           for _ in $(seq 1 15); do a "shell input keyevent KEYCODE_VOLUME_UP" >/dev/null; done
+           echo "Volumen de musica al maximo." ;;
   foto)   docker exec wearemu bash -lc "adb exec-out screencap -p" > captura.png; echo "Guardada en captura.png" ;;
   donde)  a "shell dumpsys activity activities 2>/dev/null | grep -m1 topResumedActivity" \
             | grep -oE "[a-z0-9._]+/[A-Za-z0-9._]+" | head -1 ;;
