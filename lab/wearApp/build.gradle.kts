@@ -61,6 +61,13 @@ dependencies {
     implementation(libs.wear.compose.navigation)
     implementation(libs.wear.ongoing)
 
+    // --- F5: tile de acceso rapido y complicacion en la esfera ---
+    implementation(libs.wear.tiles)
+    implementation(libs.wear.tiles.material)
+    implementation(libs.wear.protolayout)
+    implementation(libs.wear.protolayout.expression)
+    implementation(libs.wear.watchface.complications.data.source)
+
     // --- Horologist: pantallas y repositorio ya hechos ---
     implementation(libs.horologist.media)
     implementation(libs.horologist.media.data)

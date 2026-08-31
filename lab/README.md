@@ -11,6 +11,11 @@ Contenedor Docker con el toolchain completo (JDK 21, Android SDK 37, Gradle 9.5.
 | **Importa las playlists del móvil** | ✅ 2 playlists leídas del backup, sin tocar la app del móvil |
 | **Descarga para offline** | ✅ 5/5 canciones, 26 MB en el reloj |
 | **Reproduce EN MODO AVIÓN** | ✅ `state=PLAYING`, posición 6,4s → 9,3s sin red |
+| Importa la sesión del backup | ✅ cookie leída del `preferences_pb` con parser propio |
+| **Release ofuscado con R8** | ✅ 191 MB → 93 MB, búsqueda y metadatos correctos |
+| Memoria bajo reproducción | ✅ **58 MB de PSS** (holgado en un reloj de 2 GB) |
+| Arranque en frío | ✅ 873 ms |
+| **Tile en la esfera** | ✅ "Escuchar — 2 canciones sin conexion", con el dato real |
 | El core de SimpMusic compila (`:media3`) | ✅ `BUILD SUCCESSFUL in 4m 27s` |
 | El módulo `:wearApp` produce APK | ✅ `wearApp-debug.apk`, 81 MB |
 | Es una app de reloj de verdad | ✅ `uses-feature: android.hardware.type.watch` |
@@ -83,11 +88,19 @@ Están resueltas en los scripts, pero conviene conocerlas.
 
 ## Estado real del código
 
-**F0 a F3 funcionando y verificado ejecutando.** El reloj busca en YouTube Music, reproduce en streaming, importa las playlists del móvil, descarga canciones y las reproduce sin cobertura.
+**Las seis fases del plan (F0–F5) están implementadas y verificadas ejecutando**, salvo los dos puntos que se indican abajo.
 
-Quedan **F4** (activar R8 con las reglas del PR #1864 y perfilar memoria y batería en reloj real) y **F5** (tile y complicación).
+El reloj busca en YouTube Music, reproduce en streaming, importa las playlists y la sesión del móvil, descarga canciones, las reproduce sin cobertura, corre ofuscado con R8 y ofrece un tile en la esfera.
 
 Limitaciones conocidas, a propósito:
 - La importación del backup es **manual**: exportas en el móvil, llevas el fichero, importas. Sin sincronización automática, para no tocar la app del móvil ([ADR 0005](../docs/adr/0005-importar-backup-en-vez-de-sincronizar.md)).
 - No hay biblioteca **remota** de YouTube Music (tus "me gusta", tus playlists de YT): eso sí exige la cookie de Google. Las playlists locales no.
 - Las descargas van en el proceso de la app, no en un servicio en primer plano: si cierras la app a media descarga, se corta. Los ficheros a medias se descartan (`.parcial` que no se renombra), así que no quedan reproducciones rotas.
+
+## Lo que NO está verificado
+
+Dos cosas, y conviene decirlo claro:
+
+1. **La respuesta real del servidor de YouTube Music.** El flujo de sesión se probó con una cookie sintética: se extrae bien y la petición sale, pero traer tus playlists de verdad requiere una cuenta de Google real.
+2. **La complicación en la esfera.** Está registrada y el sistema la ve, y usa el mismo origen de datos que el tile (que sí se verificó mostrando el número correcto). Pero asignarla a una esfera requiere el editor de esferas, que el emulador no expone por línea de comandos.
+3. **El consumo de batería.** Un emulador no lo mide de forma significativa. Requiere hardware.
