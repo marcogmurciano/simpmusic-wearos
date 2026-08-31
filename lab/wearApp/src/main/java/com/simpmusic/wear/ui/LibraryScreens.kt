@@ -22,9 +22,21 @@ import com.simpmusic.wear.library.WearPlaylist
 import com.simpmusic.wear.music.CuentaPlaylist
 import com.simpmusic.wear.music.WearSong
 
-/** Menu raiz del reloj. */
+/**
+ * Menu raiz del reloj.
+ *
+ * [sonando] es el titulo de lo que se este reproduciendo, o null si no hay nada. Cuando
+ * hay algo, aparece un acceso permanente al reproductor: sin el habria que volver a
+ * navegar hasta la pantalla de origen solo para pausar.
+ */
 @Composable
-fun HomeScreen(onBuscar: () -> Unit, onBiblioteca: () -> Unit, onDescargas: () -> Unit) {
+fun HomeScreen(
+    onBuscar: () -> Unit,
+    onBiblioteca: () -> Unit,
+    onDescargas: () -> Unit,
+    sonando: String? = null,
+    onReproductor: () -> Unit = {},
+) {
     ScalingLazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -33,6 +45,15 @@ fun HomeScreen(onBuscar: () -> Unit, onBiblioteca: () -> Unit, onDescargas: () -
         item { Button(onClick = onBuscar, modifier = Modifier.fillMaxWidth()) { Text("Buscar") } }
         item { Button(onClick = onBiblioteca, modifier = Modifier.fillMaxWidth()) { Text("Mis playlists") } }
         item { Button(onClick = onDescargas, modifier = Modifier.fillMaxWidth()) { Text("Descargas") } }
+
+        if (sonando != null) {
+            item { ListHeader { Text("Sonando") } }
+            item {
+                Button(onClick = onReproductor, modifier = Modifier.fillMaxWidth()) {
+                    Text(sonando, maxLines = 2)
+                }
+            }
+        }
     }
 }
 

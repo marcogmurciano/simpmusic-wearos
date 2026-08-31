@@ -46,6 +46,7 @@ fun WearApp(playerRepository: PlayerRepository, consultaInicial: String? = null)
     val libraryViewModel: LibraryViewModel = viewModel()
     val playerViewModel = remember { PlayerViewModel(playerRepository) }
     val connected by playerRepository.connected.collectAsStateWithLifecycle()
+    val mediaActual by playerRepository.currentMedia.collectAsStateWithLifecycle()
 
     // La playlist abierta se guarda aqui: pasar objetos por argumentos de ruta
     // obligaria a serializarla entera en la URL.
@@ -90,6 +91,8 @@ fun WearApp(playerRepository: PlayerRepository, consultaInicial: String? = null)
                 onBuscar = { nav.navigate(Rutas.BUSCAR) },
                 onBiblioteca = { nav.navigate(Rutas.BIBLIOTECA) },
                 onDescargas = { nav.navigate(Rutas.DESCARGAS) },
+                sonando = mediaActual?.title,
+                onReproductor = { nav.navigate(Rutas.REPRODUCTOR) },
             )
         }
         composable(Rutas.BUSCAR) {
